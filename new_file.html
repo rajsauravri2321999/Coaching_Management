@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Coaching Institute Management System</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; background: #f0f4f8; }
+    .header {
+      background: #1a9de0;
+      color: white;
+      padding: 18px 30px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .header h1 { font-size: 26px; font-weight: bold; }
+    nav {
+      background: #2196f3;
+      display: flex;
+      align-items: center;
+      padding: 0 30px;
+    }
+    nav button {
+      color: white;
+      padding: 12px 28px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 15px;
+      border-right: 1px solid rgba(255,255,255,0.2);
+      transition: background 0.2s;
+    }
+    nav button:hover { background: rgba(255,255,255,0.15); }
+    .nav-user {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: white;
+    }
+    main { padding: 24px 30px; }
+    .welcome-banner {
+      background: white;
+      border-radius: 10px;
+      padding: 28px;
+      display: flex;
+      gap: 30px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .banner-img { width: 200px; height: 140px; background: #d0d0d0; border-radius: 8px; }
+    .banner-text h2 { color: #1a9de0; font-size: 22px; margin-bottom: 8px; }
+    .banner-text p { color: #555; margin-bottom: 16px; }
+    .btn-start {
+      background: #1a9de0;
+      color: white;
+      border: none;
+      padding: 10px 28px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .feature-cards {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+    .card {
+      background: white;
+      border-radius: 10px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      cursor: pointer;
+    }
+    .card-icon { width: 60px; height: 60px; border-radius: 6px; margin-bottom: 12px; }
+    .card-btn {
+      width: 100%;
+      padding: 8px;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      cursor: pointer;
+      margin-top: 12px;
+    }
+    .btn-orange { background: #f57c00; }
+    .btn-green { background: #43a047; }
+    .btn-blue { background: #1a9de0; }
+    .btn-purple { background: #9c27b0; }
+    .icon-orange { background: #f5cba7; }
+    .icon-green { background: #a9dfb5; }
+    .icon-blue { background: #a0d2ee; }
+    .icon-purple { background: #d9b6e8; }
+    .bottom-section {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 20px;
+    }
+    .stat-card {
+      border-radius: 10px;
+      padding: 18px;
+      color: white;
+      margin-bottom: 16px;
+    }
+    .stat-card.blue { background: #1a9de0; }
+    .stat-card.orange { background: #f57c00; }
+    .recent {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .activity-item {
+      display: flex;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .page { display: none; }
+    .page.active { display: block; }
+    .form-container {
+      background: white;
+      border-radius: 10px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+      color: #333;
+    }
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+    }
+    .form-btn {
+      background: #1a9de0;
+      color: white;
+      padding: 10px 24px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .table-container {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th {
+      background: #f5f5f5;
+      padding: 12px;
+      text-align: left;
+      font-weight: bold;
+      border-bottom: 2px solid #ddd;
+    }
+    td {
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+    }
+    .message {
+      padding: 12px;
+      margin-bottom: 16px;
+      border-radius: 6px;
+    }
+    .message.success { background: #c8e6c9; color: #2e7d32; }
+    .message.error { background: #ffcdd2; color: #c62828; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div style="font-size: 40px;">🏫</div>
+    <h1>Coaching Institute Management System</h1>
+  </div>
+
+  <nav>
+    <button onclick="showPage('dashboard')">Dashboard</button>
+    <button onclick="showPage('students')">Students</button>
+    <button onclick="showPage('attendance')">Attendance</button>
+    <button onclick="showPage('fees')">Fees</button>
+    <div class="nav-user">👤 Welcome Simran ▾</div>
+  </nav>
+
+  <main>
+    <!-- DASHBOARD -->
+    <div id="dashboard" class="page active">
+      <div class="welcome-banner">
+        <div class="banner-img"></div>
+        <div class="banner-text">
+          <h2>Welcome to your coaching institute</h2>
+          <p>Manage students, track attendance, and monitor fees all in one place.</p>
+          <button class="btn-start" onclick="showPage('students')">Get started</button>
+        </div>
+      </div>
+
+      <div class="feature-cards">
+        <div class="card" onclick="showPage('students')">
+          <div class="card-icon icon-orange"></div>
+          <h3>Student Management</h3>
+          <p style="font-size: 13px; color: #777;">Add and manage students</p>
+          <button class="card-btn btn-orange">View students ›</button>
+        </div>
+        <div class="card" onclick="showPage('attendance')">
+          <div class="card-icon icon-green"></div>
+          <h3>Attendance Tracking</h3>
+          <p style="font-size: 13px; color: #777;">Mark and view attendance</p>
+          <button class="card-btn btn-green">Record attendance ›</button>
+        </div>
+        <div class="card" onclick="showPage('fees')">
+          <div class="card-icon icon-blue"></div>
+          <h3>Fees Management</h3>
+          <p style="font-size: 13px; color: #777;">Track and update fees</p>
+          <button class="card-btn btn-blue">Manage Fees ›</button>
+        </div>
+        <div class="card">
+          <div class="card-icon icon-purple"></div>
+          <h3>Report & Analytics</h3>
+          <p style="font-size: 13px; color: #777;">View performance reports</p>
+          <button class="card-btn btn-purple">View reports ›</button>
+        </div>
+      </div>
+
+      <div class="bottom-section">
+        <div>
+          <div class="stat-card blue">
+            <p>Total Students</p>
+            <h3 id="totalStudents">0</h3>
+          </div>
+          <div class="stat-card orange">
+            <p>Fees Collected</p>
+            <h3 id="totalFees">€0</h3>
+          </div>
+        </div>
+        <div class="recent">
+          <h3>Recent Activities</h3>
+          <div id="recentActivities">
+            <div class="activity-item">✅ Loading...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STUDENTS -->
+    <div id="students" class="page">
+      <h2 style="margin-bottom: 20px;">Student Management</h2>
+      <div class="form-container">
+        <h3 style="margin-bottom: 16px;">Add New Student</h3>
+        <div id="studentMessage"></div>
+        <div class="form-group">
+          <label>Student Name</label>
+          <input type="text" id="studentName" placeholder="Enter name">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="studentEmail" placeholder="Enter email">
+        </div>
+        <div class="form-group">
+          <label>Phone</label>
+          <input type="text" id="studentPhone" placeholder="Enter phone">
+        </div>
+        <div class="form-group">
+          <label>Batch</label>
+          <input type="text" id="studentBatch" placeholder="e.g., Batch A">
+        </div>
+        <button class="form-btn" onclick="addStudent()">Add Student</button>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Batch</th><th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="studentsList">
+            <tr><td colspan="6" style="text-align: center;">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ATTENDANCE -->
+    <div id="attendance" class="page">
+      <h2 style="margin-bottom: 20px;">Attendance Tracking</h2>
+      <div class="form-container">
+        <h3 style="margin-bottom: 16px;">Mark Attendance</h3>
+        <div id="attendanceMessage"></div>
+        <div class="form-group">
+          <label>Student</label>
+          <select id="attendanceStudent"></select>
+        </div>
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" id="attendanceDate">
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="attendanceStatus">
+            <option>Present</option>
+            <option>Absent</option>
+            <option>Leave</option>
+          </select>
+        </div>
+        <button class="form-btn" onclick="markAttendance()">Mark Attendance</button>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr><th>Student ID</th><th>Date</th><th>Status</th></tr>
+          </thead>
+          <tbody id="attendanceList">
+            <tr><td colspan="3" style="text-align: center;">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- FEES -->
+    <div id="fees" class="page">
+      <h2 style="margin-bottom: 20px;">Fees Management</h2>
+      <div class="form-container">
+        <h3 style="margin-bottom: 16px;">Record Fee Payment</h3>
+        <div id="feesMessage"></div>
+        <div class="form-group">
+          <label>Student</label>
+          <select id="feesStudent"></select>
+        </div>
+        <div class="form-group">
+          <label>Amount</label>
+          <input type="number" id="feesAmount" placeholder="Enter amount">
+        </div>
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" id="feesDate">
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="feesStatus">
+            <option>Paid</option>
+            <option>Pending</option>
+          </select>
+        </div>
+        <button class="form-btn" onclick="recordFees()">Record Payment</button>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr><th>Student ID</th><th>Amount</th><th>Date</th><th>Status</th></tr>
+          </thead>
+          <tbody id="feesList">
+            <tr><td colspan="4" style="text-align: center;">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // ⚠️ REPLACE WITH YOUR SUPABASE CREDENTIALS
+    const SUPABASE_URL = 'https://lvkizvhtpwgwsvciuowf.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2a2l6dmh0cHdnd3N2Y2l1b3dmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4OTE0ODEsImV4cCI6MjA4ODQ2NzQ4MX0.LpZCD3YlLlHF4P7o4iu02ilnJOejYZtdCrlMElL0yVI';
+
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    function showPage(name) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(name).classList.add('active');
+      if (name === 'students') loadStudents();
+      else if (name === 'attendance') loadAttendance();
+      else if (name === 'fees') loadFees();
+      else if (name === 'dashboard') loadDashboard();
+    }
+
+    async function addStudent() {
+      const name = document.getElementById('studentName').value;
+      const email = document.getElementById('studentEmail').value;
+      const phone = document.getElementById('studentPhone').value;
+      const batch = document.getElementById('studentBatch').value;
+
+      if (!name || !email) { showMsg('studentMessage', 'Fill all fields', 'error'); return; }
+
+      const { error } = await supabase.from('students').insert([{ name, email, phone, batch }]);
+      if (error) showMsg('studentMessage', error.message, 'error');
+      else {
+        showMsg('studentMessage', 'Student added!', 'success');
+        document.getElementById('studentName').value = '';
+        document.getElementById('studentEmail').value = '';
+        document.getElementById('studentPhone').value = '';
+        document.getElementById('studentBatch').value = '';
+        loadStudents();
+      }
+    }
+
+    async function loadStudents() {
+      const { data, error } = await supabase.from('students').select('*');
+      if (error) return;
+
+      const tbody = document.getElementById('studentsList');
+      tbody.innerHTML = data.length === 0 ? '<tr><td colspan="6">No students</td></tr>' : '';
+      data.forEach(s => {
+        tbody.innerHTML += `<tr><td>${s.id}</td><td>${s.name}</td><td>${s.email}</td><td>${s.phone||'-'}</td><td>${s.batch||'-'}</td><td><button onclick="deleteStudent(${s.id})" style="background:none; border:none; color:#d32f2f; cursor:pointer;">Delete</button></td></tr>`;
+      });
+      updateSelects(data);
+    }
+
+    async function deleteStudent(id) {
+      if (confirm('Delete?')) { await supabase.from('students').delete().eq('id', id); loadStudents(); }
+    }
+
+    function updateSelects(students) {
+      let html = '<option>-- Select Student --</option>';
+      students.forEach(s => html += `<option value="${s.id}">${s.name}</option>`);
+      document.getElementById('attendanceStudent').innerHTML = html;
+      document.getElementById('feesStudent').innerHTML = html;
+    }
+
+    async function markAttendance() {
+      const sid = document.getElementById('attendanceStudent').value;
+      const date = document.getElementById('attendanceDate').value;
+      const status = document.getElementById('attendanceStatus').value;
+
+      if (!sid || !date) { showMsg('attendanceMessage', 'Fill all fields', 'error'); return; }
+
+      const { error } = await supabase.from('attendance').insert([{ student_id: sid, date, status }]);
+      if (error) showMsg('attendanceMessage', error.message, 'error');
+      else {
+        showMsg('attendanceMessage', 'Marked!', 'success');
+        loadAttendance();
+      }
+    }
+
+    async function loadAttendance() {
+      const { data, error } = await supabase.from('attendance').select('*').order('date', { ascending: false });
+      if (error) return;
+
+      const tbody = document.getElementById('attendanceList');
+      tbody.innerHTML = data.length === 0 ? '<tr><td colspan="3">No records</td></tr>' : '';
+      data.forEach(a => {
+        tbody.innerHTML += `<tr><td>${a.student_id}</td><td>${a.date}</td><td><span style="background:${a.status==='Present'?'#c8e6c9':'#ffcdd2'}; padding:4px 8px; border-radius:4px;">${a.status}</span></td></tr>`;
+      });
+    }
+
+    async function recordFees() {
+      const sid = document.getElementById('feesStudent').value;
+      const amount = document.getElementById('feesAmount').value;
+      const date = document.getElementById('feesDate').value;
+      const status = document.getElementById('feesStatus').value;
+
+      if (!sid || !amount || !date) { showMsg('feesMessage', 'Fill all fields', 'error'); return; }
+
+      const { error } = await supabase.from('fees').insert([{ student_id: sid, amount: parseFloat(amount), date, status }]);
+      if (error) showMsg('feesMessage', error.message, 'error');
+      else {
+        showMsg('feesMessage', 'Recorded!', 'success');
+        loadFees();
+      }
+    }
+
+    async function loadFees() {
+      const { data, error } = await supabase.from('fees').select('*').order('date', { ascending: false });
+      if (error) return;
+
+      const tbody = document.getElementById('feesList');
+      tbody.innerHTML = data.length === 0 ? '<tr><td colspan="4">No records</td></tr>' : '';
+      data.forEach(f => {
+        tbody.innerHTML += `<tr><td>${f.student_id}</td><td>€${f.amount}</td><td>${f.date}</td><td><span style="background:${f.status==='Paid'?'#c8e6c9':'#fff9c4'}; padding:4px 8px; border-radius:4px;">${f.status}</span></td></tr>`;
+      });
+    }
+
+    async function loadDashboard() {
+      const { data: students } = await supabase.from('students').select('id');
+      document.getElementById('totalStudents').textContent = (students?.length || 0) + ' Students';
+
+      const { data: fees } = await supabase.from('fees').select('amount');
+      const total = fees?.reduce((a,b) => a + b.amount, 0) || 0;
+      document.getElementById('totalFees').textContent = '€' + total.toLocaleString();
+
+      const { data: activities } = await supabase.from('attendance').select('*').order('date', { ascending: false }).limit(4);
+      let html = '';
+      if (activities?.length > 0) activities.forEach(a => html += `<div class="activity-item">✅ Student #${a.student_id} - ${a.status} on ${a.date}</div>`);
+      else html = '<div class="activity-item">✅ No activities yet</div>';
+      document.getElementById('recentActivities').innerHTML = html;
+    }
+
+    function showMsg(id, msg, type) {
+      const el = document.getElementById(id);
+      el.innerHTML = `<div class="message ${type}">${msg}</div>`;
+      setTimeout(() => el.innerHTML = '', 4000);
+    }
+
+    loadDashboard();
+  </script>
+
+</body>
+</html>
